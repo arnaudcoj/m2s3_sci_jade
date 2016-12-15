@@ -42,20 +42,17 @@ public class Neighbour extends Agent {
 
   			if(msg.getPerformative()== ACLMessage.REQUEST){
   				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("com") != -1)){
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received COMMUNICATE Request from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.INFORM);
-  					reply.setContent(communicate());
+  				if ((content != null) && (content.indexOf("trade") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
+  					trade(msg,reply);
   				}
           else if ((content != null) && (content.indexOf("list") != -1)) {
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.INFORM);
-  					reply.setContent(listNeighbours());
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
+            listNeighbours(msg, reply);
           }
           else if ((content != null) && (content.indexOf("inv") != -1)) {
   					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received INVENTORY Request from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.INFORM);
-  					reply.setContent(tomatoes + " " + oranges);
+            inventory(msg, reply);
           }
   				else{
   					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
@@ -75,6 +72,36 @@ public class Neighbour extends Agent {
   			block();
   		}
   	}
+
+
+      public void inventory(ACLMessage msg, ACLMessage reply) {
+        String res = "";
+        reply.setPerformative(ACLMessage.INFORM);
+
+        reply.setContent(myAgent.getLocalName() + " : Tomatoes = " + tomatoes + "/" +  tomatoes_desired + ", Oranges = " + oranges + "/" + oranges_desired);
+      }
+
+      public void trade(ACLMessage msg, ACLMessage reply) {
+        String res = "";
+        reply.setPerformative(ACLMessage.INFORM);
+
+        for (Neighbour n : neighbours) {
+          res += n.toString() + " ";
+        }
+
+        reply.setContent(res);
+      }
+
+      public void listNeighbours(ACLMessage msg, ACLMessage reply) {
+        String res = "";
+        reply.setPerformative(ACLMessage.INFORM);
+
+        for (Neighbour n : neighbours) {
+          res += n.toString() + " ";
+        }
+
+        reply.setContent(res);
+      }
   }
 
   protected void setup() {
@@ -103,21 +130,6 @@ public class Neighbour extends Agent {
 		}
   }
 
-  public String communicate() {
-    String res = "";
-    for (Neighbour n : neighbours) {
-      res += n.toString() + " ";
-    }
-    return res;
-  }
-
-  public String listNeighbours() {
-    String res = "";
-    for (Neighbour n : neighbours) {
-      res += n.toString() + " ";
-    }
-    return res;
-  }
 
   public String toString() {
     return getLocalName();
