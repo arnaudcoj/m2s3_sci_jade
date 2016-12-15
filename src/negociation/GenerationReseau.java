@@ -44,7 +44,7 @@ public class GenerationReseau extends Agent {
       System.out.println(e);
     }
 
-    System.out.println("Hello World! I am the doctor "+getLocalName());
+    System.out.println("Hello World! I am "+getLocalName());
    	// Make this agent terminate
   	doDelete();
   }

@@ -95,6 +95,14 @@ public class Neighbour extends Agent {
     this.neighbours.add(n);
   }
 
+  protected void removeNeighbour(Neighbour n) {
+    this.neighbours.remove(n);
+  }
+
+  protected boolean hasNeighbour(Neighbour n) {
+    return this.neighbours.contains(n);
+  }
+
   public List<Neighbour> getNeighbours() {
     return neighbours;
   }
