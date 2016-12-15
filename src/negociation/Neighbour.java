@@ -11,6 +11,7 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.util.Logger;
 
+import java.util.Random;
 /**
    This example shows a minimal agent that just prints "Hello World!"
    and then terminates.
@@ -18,8 +19,15 @@ import jade.util.Logger;
  */
 public class Neighbour extends Agent {
 
+  static protected Random r;
+
 	private Logger myLogger = Logger.getMyLogger(getClass().getName());
   protected List<Neighbour> neighbours = new LinkedList<Neighbour>();
+
+  protected int oranges;
+  protected int tomatoes;
+  protected int oranges_desired;
+  protected int tomatoes_desired;
 
 	private class WaitPingAndReplyBehaviour extends CyclicBehaviour {
 
@@ -34,11 +42,21 @@ public class Neighbour extends Agent {
 
   			if(msg.getPerformative()== ACLMessage.REQUEST){
   				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("ping") != -1)){
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received PING Request from "+msg.getSender().getLocalName());
+  				if ((content != null) && (content.indexOf("com") != -1)){
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received COMMUNICATE Request from "+msg.getSender().getLocalName());
   					reply.setPerformative(ACLMessage.INFORM);
-  					reply.setContent(neighboursString());
+  					reply.setContent(communicate());
   				}
+          else if ((content != null) && (content.indexOf("list") != -1)) {
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
+  					reply.setPerformative(ACLMessage.INFORM);
+  					reply.setContent(listNeighbours());
+          }
+          else if ((content != null) && (content.indexOf("inv") != -1)) {
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received INVENTORY Request from "+msg.getSender().getLocalName());
+  					reply.setPerformative(ACLMessage.INFORM);
+  					reply.setContent(tomatoes + " " + oranges);
+          }
   				else{
   					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
   					reply.setPerformative(ACLMessage.REFUSE);
@@ -60,7 +78,13 @@ public class Neighbour extends Agent {
   }
 
   protected void setup() {
-    System.out.println("Hello World! My name is "+getLocalName());
+    r = new Random();
+    oranges_desired = r.nextInt(10);
+    tomatoes_desired = r.nextInt(10);
+    oranges = r.nextInt(10);
+    tomatoes = r.nextInt(10);
+    System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
+
 		// Registration with the DF
 		DFAgentDescription dfd = new DFAgentDescription();
 		ServiceDescription sd = new ServiceDescription();
@@ -79,7 +103,15 @@ public class Neighbour extends Agent {
 		}
   }
 
-  public String neighboursString() {
+  public String communicate() {
+    String res = "";
+    for (Neighbour n : neighbours) {
+      res += n.toString() + " ";
+    }
+    return res;
+  }
+
+  public String listNeighbours() {
     String res = "";
     for (Neighbour n : neighbours) {
       res += n.toString() + " ";
