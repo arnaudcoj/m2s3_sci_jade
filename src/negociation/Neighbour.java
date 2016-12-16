@@ -14,7 +14,7 @@ import jade.util.Logger;
 import java.util.Random;
 
 /**
-@author Arnaud Cojez, based on Giovanni Caire's Hello World example
+@author Tristan Camus & Arnaud Cojez
 */
 public class Neighbour extends Agent {
   static protected int max_oranges = 10;
@@ -274,7 +274,7 @@ public class Neighbour extends Agent {
     ServiceDescription sd = new ServiceDescription();
     sd.setType("Neighbour");
     sd.setName(getName());
-    sd.setOwnership("Cojez");
+    sd.setOwnership("Camus_Cojez");
     dfd.setName(getAID());
     dfd.addServices(sd);
     try {

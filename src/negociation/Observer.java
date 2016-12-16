@@ -10,6 +10,9 @@ import jade.domain.DFService;
 import jade.domain.FIPAException;
 import jade.util.Logger;
 
+/**
+@author Tristan Camus & Arnaud Cojez
+*/
 public class Observer extends Agent {
 
   protected List<Neighbour> agents;
@@ -108,7 +111,7 @@ public class Observer extends Agent {
     ServiceDescription sd = new ServiceDescription();
     sd.setType("Observer");
     sd.setName(getName());
-    sd.setOwnership("Cojez");
+    sd.setOwnership("Camus_Cojez");
     dfd.setName(getAID());
     dfd.addServices(sd);
     try {

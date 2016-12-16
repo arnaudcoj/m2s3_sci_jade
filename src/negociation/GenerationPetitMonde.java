@@ -10,7 +10,7 @@ import java.util.Random;
 /**
 This example shows a minimal agent that just prints "Hello World!"
 and then terminates.
-@author Giovanni Caire - TILAB
+@author Tristan Camus et Arnaud Cojez
 */
 public class GenerationPetitMonde extends Agent {
   protected int k = 4;
