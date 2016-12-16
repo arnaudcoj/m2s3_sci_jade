@@ -26,7 +26,7 @@ Il est généré en suivant l'algorithme de [Watts et Strogatz](https://en.wikip
 
 Les propriétés choisies ici sont :
   * Nombre de nœuds n = 10 ;
-  * Degré d'un nœeud k = 4 ;
+  * Degré d'un nœud k = 4 ;
   * Probabilité de recâblage B = 0.2.
 
 Pour une lecture et vérification simplifiée, l'algorithme utilisé dans la classe ```GenerationPetitMonde``` est également implémenté dans le fichier ```smallworld.py```.
