@@ -1,0 +1,6 @@
+télécharger jade, placer negociation dans jade/src/
+
+pour lancer:
+  dans JADE-all-4.4.0/jade :
+
+  $ javac -classpath lib/jade.jar -d classes src/negociation/*.java* && java -cp lib/jade.jar:classes jade.Boot -gui -agents ElCreador:negociation.GenerationPetitMonde
