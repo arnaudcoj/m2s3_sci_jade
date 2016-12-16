@@ -35,14 +35,63 @@ public class Neighbour extends Agent {
 			super(a);
 		}
 
+    //message handling and routing
     public void action() {
   		ACLMessage  msg = myAgent.receive();
   		if(msg != null){
   			ACLMessage reply = msg.createReply();
 
-  			if(msg.getPerformative()== ACLMessage.REQUEST){
+        if(msg.getPerformative() == ACLMessage.PROPOSE) {
   				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("trade") != -1)){
+  				if ((content != null) && (content.indexOf("orange") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Proposal from "+msg.getSender().getLocalName());
+            handleOrangeProposal();
+          }
+  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Proposal from "+msg.getSender().getLocalName());
+            handleTomatoProposal();
+          }
+  				else{
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
+  					reply.setPerformative(ACLMessage.REFUSE);
+  					reply.setContent("( UnexpectedContent ("+content+"))");
+  				}
+        }
+        else if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+  				String content = msg.getContent();
+  				if ((content != null) && (content.indexOf("orange") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Accept from "+msg.getSender().getLocalName());
+            handleOrangeAccept();
+          }
+  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Accept from "+msg.getSender().getLocalName());
+            handleTomatoAccept();
+          }
+  				else{
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
+  					reply.setPerformative(ACLMessage.REFUSE);
+  					reply.setContent("( UnexpectedContent ("+content+"))");
+  				}
+        }
+        else if(msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
+  				String content = msg.getContent();
+  				if ((content != null) && (content.indexOf("orange") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Reject from "+msg.getSender().getLocalName());
+            handleOrangeRefuse();
+          }
+  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Reject from "+msg.getSender().getLocalName());
+            handleTomatoRefuse();
+          }
+  				else{
+  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
+  					reply.setPerformative(ACLMessage.REFUSE);
+  					reply.setContent("( UnexpectedContent ("+content+"))");
+  				}
+        }
+        else if(msg.getPerformative()== ACLMessage.REQUEST){
+          String content = msg.getContent();
+          if ((content != null) && (content.indexOf("trade") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
   					trade(msg,reply);
   				}
@@ -73,36 +122,101 @@ public class Neighbour extends Agent {
   		}
   	}
 
+    //REQUESTS===========================
 
-      public void inventory(ACLMessage msg, ACLMessage reply) {
-        String res = "";
-        reply.setPerformative(ACLMessage.INFORM);
+    public void listNeighbours(ACLMessage msg, ACLMessage reply) {
+      String res = "";
+      reply.setPerformative(ACLMessage.INFORM);
 
-        reply.setContent(myAgent.getLocalName() + " : Tomatoes = " + tomatoes + "/" +  tomatoes_desired + ", Oranges = " + oranges + "/" + oranges_desired);
+      for (Neighbour n : neighbours) {
+        res += n.toString() + " ";
       }
 
-      public void trade(ACLMessage msg, ACLMessage reply) {
-        String res = "";
-        reply.setPerformative(ACLMessage.INFORM);
+      reply.setContent(res);
+    }
 
-        for (Neighbour n : neighbours) {
-          res += n.toString() + " ";
+    public void inventory(ACLMessage msg, ACLMessage reply) {
+      String res = "";
+      reply.setPerformative(ACLMessage.INFORM);
+
+      reply.setContent(myAgent.getLocalName() + " : Tomatoes = " + tomatoes + "/" +  tomatoes_desired + ", Oranges = " + oranges + "/" + oranges_desired);
+    }
+
+    public void trade(ACLMessage msg, ACLMessage reply) {
+      String res = "";
+      reply.setPerformative(ACLMessage.INFORM);
+
+      for (Neighbour n : neighbours) {
+        res += n.toString() + " ";
+      }
+
+      reply.setContent(res);
+    }
+
+    //TRADE=============================
+
+    public void handleOrangeProposal() {
+      if(oranges < oranges_desired) {
+        acceptOrange();
+      } else {
+        refuseOrange();
+      }
+    }
+
+    public void acceptOrange() {
+      oranges += 1;
+      //send message
+    }
+
+    public void refuseOrange() {
+      //send message
+    }
+
+
+    public void handleTomatoProposal() {
+      if(oranges < oranges_desired) {
+        acceptOrange();
+      } else {
+        refuseOrange();
+      }
+    }
+
+    public void acceptTomato() {
+      tomatoes += 1;
+      //send message
+    }
+
+    public void refuseTomato() {
+      //send message
+    }
+
+    public void handleOrangeAccept() {
+        if(oranges < 1) {
+          throw new IllegalStateException("oranges < 1 when accepting trade");
+        } else {
+          oranges -= 1;
         }
+    }
 
-        reply.setContent(res);
+    public void handleTomatoAccept() {
+      if(tomatoes < 1) {
+        throw new IllegalStateException("tomatoes < 1 when accepting trade");
+      } else {
+        tomatoes -= 1;
       }
+    }
 
-      public void listNeighbours(ACLMessage msg, ACLMessage reply) {
-        String res = "";
-        reply.setPerformative(ACLMessage.INFORM);
+    public void handleOrangeRefuse() {
 
-        for (Neighbour n : neighbours) {
-          res += n.toString() + " ";
-        }
+    }
 
-        reply.setContent(res);
-      }
+    public void handleTomatoRefuse() {
+
+    }
+
   }
+
+  //SETUP============================
 
   protected void setup() {
     r = new Random();
