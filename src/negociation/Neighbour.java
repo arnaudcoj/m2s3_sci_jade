@@ -28,12 +28,15 @@ public class Neighbour extends Agent {
   protected int oranges_desired;
   protected int tomatoes_desired;
 
-  private class WaitPingAndReplyBehaviour extends CyclicBehaviour {
+  private class TradingBehaviour extends SimpleBehaviour {
 
-    public WaitPingAndReplyBehaviour(Agent a) {
+    public TradingBehaviour(Agent a) {
       super(a);
     }
 
+    public boolean done() {
+      return oranges == oranges_desired && tomatoes == tomatoes_desired;
+    }
     //message handling and routing
     public void action() {
       messagesToSend.clear();
@@ -257,8 +260,8 @@ public class Neighbour extends Agent {
     dfd.addServices(sd);
     try {
       DFService.register(this,dfd);
-      WaitPingAndReplyBehaviour PingBehaviour = new  WaitPingAndReplyBehaviour(this);
-      addBehaviour(PingBehaviour);
+      TradingBehaviour TradingBehaviour = new  TradingBehaviour(this);
+      addBehaviour(TradingBehaviour);
     } catch (FIPAException e) {
       myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
       doDelete();
