@@ -144,13 +144,13 @@ public class Neighbour extends Agent {
 
     public void trade(ACLMessage msg, ACLMessage reply) {
       String res = "";
-      reply.setPerformative(ACLMessage.INFORM);
-
+      reply.setPerformative(ACLMessage.PROPOSE);
+/*
       for (Neighbour n : neighbours) {
-        res += n.toString() + " ";
-      }
-
-      reply.setContent(res);
+        reply.addReceiver(new AID(n.getLocalName(), AID.ISLOCALNAME));
+      }*/
+      reply.addReceiver(new AID("Neighbour0", AID.ISLOCALNAME));
+      reply.setContent("orange");
     }
 
     //TRADE=============================
