@@ -13,15 +13,13 @@ import jade.util.Logger;
 
 import java.util.Random;
 /**
-   This example shows a minimal agent that just prints "Hello World!"
-   and then terminates.
-   @author Giovanni Caire - TILAB
- */
+@author Arnaud Cojez, based on Giovanni Caire's Hello World example
+*/
 public class Neighbour extends Agent {
 
   static protected Random r;
 
-	private Logger myLogger = Logger.getMyLogger(getClass().getName());
+  private Logger myLogger = Logger.getMyLogger(getClass().getName());
   protected List<Neighbour> neighbours = new LinkedList<Neighbour>();
 
   protected int oranges;
@@ -29,108 +27,108 @@ public class Neighbour extends Agent {
   protected int oranges_desired;
   protected int tomatoes_desired;
 
-	private class WaitPingAndReplyBehaviour extends CyclicBehaviour {
+  private class WaitPingAndReplyBehaviour extends CyclicBehaviour {
 
-		public WaitPingAndReplyBehaviour(Agent a) {
-			super(a);
-		}
+    public WaitPingAndReplyBehaviour(Agent a) {
+      super(a);
+    }
 
     //message handling and routing
     public void action() {
-  		ACLMessage  msg = myAgent.receive();
-  		if(msg != null){
-  			ACLMessage reply = null;
+      ACLMessage  msg = myAgent.receive();
+      if(msg != null){
+        ACLMessage reply = null;
 
         if(msg.getPerformative() == ACLMessage.PROPOSE) {
-  				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("orange") != -1)){
+          String content = msg.getContent();
+          if ((content != null) && (content.indexOf("orange") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Proposal from "+msg.getSender().getLocalName());
             reply = handleOrangeProposal(msg);
           }
-  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+          else if ((content != null) && (content.indexOf("tomato") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Proposal from "+msg.getSender().getLocalName());
             reply = handleTomatoProposal(msg);
           }
-  				else{
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected propose ["+content+"] received from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.REFUSE);
-  					reply.setContent("( UnexpectedContent ("+content+"))");
-  				}
+          else{
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected propose ["+content+"] received from "+msg.getSender().getLocalName());
+            reply.setPerformative(ACLMessage.REFUSE);
+            reply.setContent("( UnexpectedContent ("+content+"))");
+          }
         }
         else if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
-  				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("orange") != -1)){
+          String content = msg.getContent();
+          if ((content != null) && (content.indexOf("orange") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Accept from "+msg.getSender().getLocalName());
             handleOrangeAccept();
           }
-  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+          else if ((content != null) && (content.indexOf("tomato") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Accept from "+msg.getSender().getLocalName());
             handleTomatoAccept();
           }
-  				else{
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected accet ["+content+"] received from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.REFUSE);
-  					reply.setContent("( UnexpectedContent ("+content+"))");
-  				}
+          else{
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected accet ["+content+"] received from "+msg.getSender().getLocalName());
+            reply.setPerformative(ACLMessage.REFUSE);
+            reply.setContent("( UnexpectedContent ("+content+"))");
+          }
         }
         else if(msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
-  				String content = msg.getContent();
-  				if ((content != null) && (content.indexOf("orange") != -1)){
+          String content = msg.getContent();
+          if ((content != null) && (content.indexOf("orange") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Reject from "+msg.getSender().getLocalName());
             handleOrangeRefuse();
           }
-  				else if ((content != null) && (content.indexOf("tomato") != -1)){
+          else if ((content != null) && (content.indexOf("tomato") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Reject from "+msg.getSender().getLocalName());
             handleTomatoRefuse();
           }
-  				else{
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected reject ["+content+"] received from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.REFUSE);
-  					reply.setContent("( UnexpectedContent ("+content+"))");
-  				}
+          else{
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected reject ["+content+"] received from "+msg.getSender().getLocalName());
+            reply.setPerformative(ACLMessage.REFUSE);
+            reply.setContent("( UnexpectedContent ("+content+"))");
+          }
         }
         else if(msg.getPerformative()== ACLMessage.REQUEST){
           String content = msg.getContent();
           if ((content != null) && (content.indexOf("trade") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
-  					reply = trade(msg);
-  				}
+            reply = trade(msg);
+          }
           else if ((content != null) && (content.indexOf("list") != -1)) {
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
             reply = listNeighbours(msg);
           }
           else if ((content != null) && (content.indexOf("inv") != -1)) {
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received INVENTORY Request from "+msg.getSender().getLocalName());
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received INVENTORY Request from "+msg.getSender().getLocalName());
             reply = inventory(msg);
           }
-  				else{
-  					myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
-  					reply.setPerformative(ACLMessage.REFUSE);
-  					reply.setContent("( UnexpectedContent ("+content+"))");
-  				}
+          else{
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
+            reply.setPerformative(ACLMessage.REFUSE);
+            reply.setContent("( UnexpectedContent ("+content+"))");
+          }
 
-  			}
-  			else {
-  				myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected message ["+ACLMessage.getPerformative(msg.getPerformative())+"] received from "+msg.getSender().getLocalName());
-  				reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
-  				reply.setContent("( (Unexpected-act "+ACLMessage.getPerformative(msg.getPerformative())+") )");
-  			}
+        }
+        else {
+          myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected message ["+ACLMessage.getPerformative(msg.getPerformative())+"] received from "+msg.getSender().getLocalName());
+          reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
+          reply.setContent("( (Unexpected-act "+ACLMessage.getPerformative(msg.getPerformative())+") )");
+        }
         if(reply != null) {
-  			  send(reply);
+          send(reply);
           System.out.println(myAgent.getLocalName() + " will send " + reply);
         } else {
           System.out.println(myAgent.getLocalName() + " won't send anything");
         }
-  		}
-  		else {
-  			block();
-  		}
-  	}
+      }
+      else {
+        block();
+      }
+    }
 
     //REQUESTS===========================
 
     protected ACLMessage listNeighbours(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       String res = "";
       reply.setPerformative(ACLMessage.INFORM);
 
@@ -143,7 +141,7 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage inventory(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       String res = "";
       reply.setPerformative(ACLMessage.INFORM);
 
@@ -152,14 +150,24 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage trade(ACLMessage msg) {
-  		ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
       String res = "";
-/*
-      for (Neighbour n : neighbours) {
-        reply.addReceiver(new AID(n.getLocalName(), AID.ISLOCALNAME));
-      }*/
+
+      //for (Neighbour n : neighbours) {
+      //  reply.addReceiver(new AID(n.getLocalName(), AID.ISLOCALNAME));
+      //}
+
+      if(oranges > oranges_desired) {
+        res += "orange";
+      }
+      if(tomatoes > tomatoes_desired) {
+        res += "tomato";
+      }
+      if(res == "")
+      return null;
+
+      ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
       reply.addReceiver(neighbours.get(0).getAID());
-      reply.setContent("orange");
+      reply.setContent(res);
       return reply;
     }
 
@@ -173,7 +181,7 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage acceptOrange(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
       reply.setContent("orange");
       oranges += 1;
@@ -182,7 +190,7 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage refuseOrange(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
       reply.setContent("orange");
       //send message
@@ -198,7 +206,7 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage acceptTomato(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       reply.setPerformative(ACLMessage.ACCEPT_PROPOSAL);
       reply.setContent("tomato");
       tomatoes += 1;
@@ -207,7 +215,7 @@ public class Neighbour extends Agent {
     }
 
     protected ACLMessage refuseTomato(ACLMessage msg) {
-  		ACLMessage reply = msg.createReply();
+      ACLMessage reply = msg.createReply();
       reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
       reply.setContent("tomato");
       //send message
@@ -217,11 +225,11 @@ public class Neighbour extends Agent {
 
 
     protected void handleOrangeAccept() {
-        if(oranges < 1) {
-          throw new IllegalStateException("oranges < 1 when accepting trade");
-        } else {
-          oranges -= 1;
-        }
+      if(oranges < 1) {
+        throw new IllegalStateException("oranges < 1 when accepting trade");
+      } else {
+        oranges -= 1;
+      }
     }
 
     protected void handleTomatoAccept() {
@@ -252,22 +260,22 @@ public class Neighbour extends Agent {
     tomatoes = r.nextInt(10);
     System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
 
-		// Registration with the DF
-		DFAgentDescription dfd = new DFAgentDescription();
-		ServiceDescription sd = new ServiceDescription();
-		sd.setType("Neighbour");
-		sd.setName(getName());
-		sd.setOwnership("TILAB");
-		dfd.setName(getAID());
-		dfd.addServices(sd);
-		try {
-			DFService.register(this,dfd);
-			WaitPingAndReplyBehaviour PingBehaviour = new  WaitPingAndReplyBehaviour(this);
-			addBehaviour(PingBehaviour);
-		} catch (FIPAException e) {
-			myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
-			doDelete();
-		}
+    // Registration with the DF
+    DFAgentDescription dfd = new DFAgentDescription();
+    ServiceDescription sd = new ServiceDescription();
+    sd.setType("Neighbour");
+    sd.setName(getName());
+    sd.setOwnership("Cojez");
+    dfd.setName(getAID());
+    dfd.addServices(sd);
+    try {
+      DFService.register(this,dfd);
+      WaitPingAndReplyBehaviour PingBehaviour = new  WaitPingAndReplyBehaviour(this);
+      addBehaviour(PingBehaviour);
+    } catch (FIPAException e) {
+      myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
+      doDelete();
+    }
   }
 
 
