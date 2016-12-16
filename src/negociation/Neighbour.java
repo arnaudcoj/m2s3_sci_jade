@@ -12,10 +12,13 @@ import jade.domain.FIPAException;
 import jade.util.Logger;
 
 import java.util.Random;
+
 /**
 @author Arnaud Cojez, based on Giovanni Caire's Hello World example
 */
 public class Neighbour extends Agent {
+  static protected int max_oranges = 10;
+  static protected int max_tomatoes = 10;
 
   static protected Random r;
 
@@ -30,6 +33,7 @@ public class Neighbour extends Agent {
   private class TradingBehaviour extends SimpleBehaviour {
 
     protected int proposals;
+    protected boolean trading = false;
 
     public TradingBehaviour(Agent a) {
       super(a);
@@ -79,12 +83,17 @@ public class Neighbour extends Agent {
         }
         else if(msg.getPerformative()== ACLMessage.REQUEST){
           String content = msg.getContent();
-          /*if ((content != null) && (content.indexOf("trade") != -1)){
-            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
-            trade(msg);
+          if ((content != null) && (content.indexOf("start") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received START Request from "+msg.getSender().getLocalName());
+            trading = true;
           }
-          else */
-          if ((content != null) && (content.indexOf("list") != -1)) {
+          else if ((content != null) && (content.indexOf("trade") != -1)){
+            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
+            if(!trading) {
+              trade(msg);
+            }
+          }
+          else if ((content != null) && (content.indexOf("list") != -1)) {
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
             listNeighbours(msg);
           }
@@ -115,7 +124,9 @@ public class Neighbour extends Agent {
       else {
         block();
       }
-      trade(msg);
+      if(trading) {
+        trade(msg);
+      }
     }
 
     //REQUESTS===========================
@@ -252,11 +263,11 @@ public class Neighbour extends Agent {
 
   protected void setup() {
     r = new Random();
-    oranges_desired = r.nextInt(10);
-    tomatoes_desired = r.nextInt(10);
-    oranges = r.nextInt(10);
-    tomatoes = r.nextInt(10);
-    //System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
+    oranges_desired = r.nextInt(max_oranges);
+    tomatoes_desired = r.nextInt(max_tomatoes);
+    oranges = r.nextInt(max_oranges);
+    tomatoes = r.nextInt(max_tomatoes);
+    System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
 
     // Registration with the DF
     DFAgentDescription dfd = new DFAgentDescription();
@@ -275,7 +286,6 @@ public class Neighbour extends Agent {
       doDelete();
     }
 
-    System.out.println(getLocalName() + getInventory());
   }
 
 

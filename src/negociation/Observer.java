@@ -29,6 +29,12 @@ public class Observer extends Agent {
           if ((content != null) && (content.indexOf("info") != -1)){
             sendAgentsInfo(msg);
           }
+          else if ((content != null) && (content.indexOf("trade") != -1)){
+            trade(msg);
+          }
+          else if ((content != null) && (content.indexOf("start") != -1)){
+            start(msg);
+          }
           else{
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected request ["+content+"] received from "+msg.getSender().getLocalName());
 
@@ -65,6 +71,29 @@ public class Observer extends Agent {
       System.out.print(res);
       send(reply);
     }
+
+    public void trade(ACLMessage msg) {
+      ACLMessage reply = new ACLMessage(ACLMessage.REQUEST);
+      reply.setContent("trade");
+
+      for (Neighbour n : agents) {
+        reply.addReceiver(n.getAID());
+      }
+
+      send(reply);
+    }
+
+    public void start(ACLMessage msg) {
+      ACLMessage reply = new ACLMessage(ACLMessage.REQUEST);
+      reply.setContent("start");
+
+      for (Neighbour n : agents) {
+        reply.addReceiver(n.getAID());
+      }
+
+      send(reply);
+    }
+
   }
 
 
