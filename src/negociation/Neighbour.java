@@ -21,7 +21,6 @@ public class Neighbour extends Agent {
 
   private Logger myLogger = Logger.getMyLogger(getClass().getName());
   protected List<Neighbour> neighbours = new LinkedList<Neighbour>();
-  protected List<ACLMessage> messagesToSend  = new LinkedList<ACLMessage>();
 
   protected int oranges;
   protected int tomatoes;
@@ -30,19 +29,21 @@ public class Neighbour extends Agent {
 
   private class TradingBehaviour extends SimpleBehaviour {
 
+    protected int proposals;
+
     public TradingBehaviour(Agent a) {
       super(a);
     }
 
     public boolean done() {
-      return oranges == oranges_desired && tomatoes == tomatoes_desired;
+      return (oranges == oranges_desired && tomatoes == tomatoes_desired) || proposals > 20;
     }
     //message handling and routing
     public void action() {
-      messagesToSend.clear();
       ACLMessage  msg = myAgent.receive();
       if(msg != null){
         if(msg.getPerformative() == ACLMessage.PROPOSE) {
+          proposals += 1;
           String content = msg.getContent();
           if ((content != null) && (content.indexOf("orange") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Proposal from "+msg.getSender().getLocalName());
@@ -54,6 +55,7 @@ public class Neighbour extends Agent {
           }
         }
         else if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
+          proposals -= 1;
           String content = msg.getContent();
           if ((content != null) && (content.indexOf("orange") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received ORANGE Accept from "+msg.getSender().getLocalName());
@@ -77,11 +79,12 @@ public class Neighbour extends Agent {
         }
         else if(msg.getPerformative()== ACLMessage.REQUEST){
           String content = msg.getContent();
-          if ((content != null) && (content.indexOf("trade") != -1)){
+          /*if ((content != null) && (content.indexOf("trade") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TRADE Request from "+msg.getSender().getLocalName());
             trade(msg);
           }
-          else if ((content != null) && (content.indexOf("list") != -1)) {
+          else */
+          if ((content != null) && (content.indexOf("list") != -1)) {
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received LIST Request from "+msg.getSender().getLocalName());
             listNeighbours(msg);
           }
@@ -112,6 +115,7 @@ public class Neighbour extends Agent {
       else {
         block();
       }
+      trade(msg);
     }
 
     //REQUESTS===========================
@@ -242,6 +246,10 @@ public class Neighbour extends Agent {
 
   //SETUP============================
 
+  protected String getInventory() {
+    return ", Oranges = " + oranges + "/" + oranges_desired + ", Tomatoes = " + tomatoes + "/" +  tomatoes_desired;
+  }
+
   protected void setup() {
     r = new Random();
     oranges_desired = r.nextInt(10);
@@ -266,6 +274,8 @@ public class Neighbour extends Agent {
       myLogger.log(Logger.SEVERE, "Agent "+getLocalName()+" - Cannot register with DF", e);
       doDelete();
     }
+
+    System.out.println(getLocalName() + getInventory());
   }
 
 

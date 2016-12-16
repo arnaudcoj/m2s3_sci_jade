@@ -8,10 +8,10 @@ import jade.wrapper.ContainerController;
 import java.util.Random;
 
 /**
-   This example shows a minimal agent that just prints "Hello World!"
-   and then terminates.
-   @author Giovanni Caire - TILAB
- */
+This example shows a minimal agent that just prints "Hello World!"
+and then terminates.
+@author Giovanni Caire - TILAB
+*/
 public class GenerationPetitMonde extends Agent {
   protected int k = 4;
   protected int n = 10;
@@ -20,13 +20,13 @@ public class GenerationPetitMonde extends Agent {
   static protected Random r;
 
   protected void connect(Neighbour n1, Neighbour n2) {
-    System.out.println("connect " + n1 + " " + n2);
+    //System.out.println("connect " + n1 + " " + n2);
     n1.addNeighbour(n2);
     n2.addNeighbour(n1);
   }
 
   protected void disconnect(Neighbour n1, Neighbour n2) {
-    System.out.println("disconnect " + n1 + " " + n2);
+    //System.out.println("disconnect " + n1 + " " + n2);
     n1.removeNeighbour(n2);
     n2.removeNeighbour(n1);
   }
@@ -46,9 +46,14 @@ public class GenerationPetitMonde extends Agent {
         agents[i] = agent;
       }
 
+      Observer agent = new Observer();
+      ac = cc.acceptNewAgent("Observer", agent);
+      ac.start();
+      agent.setAgentsList(Arrays.asList(agents));
+
       for(int i = 0; i < n; i++) {
         for(int j = 1; j < Math.floor(k/2 + 1); j++) {
-            connect(agents[i], agents[(i + j) % n]);
+          connect(agents[i], agents[(i + j) % n]);
         }
       }
 
@@ -71,8 +76,8 @@ public class GenerationPetitMonde extends Agent {
     }
 
     System.out.println("Hello World! I am "+getLocalName());
-   	// Make this agent terminate
-  	doDelete();
+    // Make this agent terminate
+    doDelete();
   }
 
   public static Neighbour getRandomNeighbour(List<Neighbour> l) {
