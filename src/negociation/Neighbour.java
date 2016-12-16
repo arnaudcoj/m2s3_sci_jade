@@ -49,14 +49,6 @@ public class Neighbour extends Agent {
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Proposal from "+msg.getSender().getLocalName());
             handleTomatoProposal(msg);
           }
-          else{
-            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected propose ["+content+"] received from "+msg.getSender().getLocalName());
-
-            ACLMessage reply = msg.createReply();
-            reply.setPerformative(ACLMessage.REFUSE);
-            reply.setContent("( UnexpectedContent ("+content+"))");
-            messagesToSend.add(reply);
-          }
         }
         else if(msg.getPerformative() == ACLMessage.ACCEPT_PROPOSAL) {
           String content = msg.getContent();
@@ -68,14 +60,6 @@ public class Neighbour extends Agent {
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Accept from "+msg.getSender().getLocalName());
             handleTomatoAccept();
           }
-          else{
-            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected accept ["+content+"] received from "+msg.getSender().getLocalName());
-
-            ACLMessage reply = msg.createReply();
-            reply.setPerformative(ACLMessage.REFUSE);
-            reply.setContent("( UnexpectedContent ("+content+"))");
-            messagesToSend.add(reply);
-          }
         }
         else if(msg.getPerformative() == ACLMessage.REJECT_PROPOSAL) {
           String content = msg.getContent();
@@ -86,14 +70,6 @@ public class Neighbour extends Agent {
           else if ((content != null) && (content.indexOf("tomato") != -1)){
             myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Received TOMATO Reject from "+msg.getSender().getLocalName());
             handleTomatoRefuse();
-          }
-          else{
-            myLogger.log(Logger.INFO, "Agent "+getLocalName()+" - Unexpected reject ["+content+"] received from "+msg.getSender().getLocalName());
-
-            ACLMessage reply = msg.createReply();
-            reply.setPerformative(ACLMessage.REFUSE);
-            reply.setContent("( UnexpectedContent ("+content+"))");
-            messagesToSend.add(reply);
           }
         }
         else if(msg.getPerformative()== ACLMessage.REQUEST){
@@ -116,7 +92,7 @@ public class Neighbour extends Agent {
             ACLMessage reply = msg.createReply();
             reply.setPerformative(ACLMessage.REFUSE);
             reply.setContent("( UnexpectedContent ("+content+"))");
-            messagesToSend.add(reply);
+            send(reply);
           }
 
         }
@@ -126,12 +102,9 @@ public class Neighbour extends Agent {
           ACLMessage reply = msg.createReply();
           reply.setPerformative(ACLMessage.NOT_UNDERSTOOD);
           reply.setContent("( (Unexpected-act "+ACLMessage.getPerformative(msg.getPerformative())+") )");
-          messagesToSend.add(reply);
-        }
-        for(ACLMessage reply : messagesToSend) {
           send(reply);
-          System.out.println(myAgent.getLocalName() + " will send " + reply);
         }
+
       }
       else {
         block();
@@ -150,7 +123,7 @@ public class Neighbour extends Agent {
       }
 
       reply.setContent(res);
-      messagesToSend.add(reply);
+      send(reply);
     }
 
     protected void inventory(ACLMessage msg) {
@@ -159,30 +132,28 @@ public class Neighbour extends Agent {
       reply.setPerformative(ACLMessage.INFORM);
 
       reply.setContent(myAgent.getLocalName() + " : Tomatoes = " + tomatoes + "/" +  tomatoes_desired + ", Oranges = " + oranges + "/" + oranges_desired);
-      messagesToSend.add(reply);
+      send(reply);
     }
 
     protected void trade(ACLMessage msg) {
       String res = "";
+      for (int i = 0; i < neighbours.size(); i++) {
+        Neighbour n = neighbours.get(i);
 
-      if(oranges > oranges_desired) {
-        res += "orange";
+        if(oranges - i > oranges_desired) {
+          ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
+          reply.addReceiver(n.getAID());
+          reply.setContent("orange");
+          send(reply);
+        }
+        if(tomatoes - i > tomatoes_desired) {
+          ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
+          reply.addReceiver(n.getAID());
+          reply.setContent("tomato");
+          send(reply);
+        }
       }
-      if(tomatoes > tomatoes_desired) {
-        res += "tomato";
-      }
-      if(res == "")
-        return ;
 
-      ACLMessage reply = new ACLMessage(ACLMessage.PROPOSE);
-
-      for (Neighbour n : neighbours) {
-        reply.addReceiver(new AID(n.getLocalName(), AID.ISLOCALNAME));
-      }
-
-      reply.addReceiver(neighbours.get(0).getAID());
-      reply.setContent(res);
-      messagesToSend.add(reply);
     }
 
     //TRADE=============================
@@ -201,7 +172,7 @@ public class Neighbour extends Agent {
       reply.setContent("orange");
       oranges += 1;
       //send message
-      messagesToSend.add(reply);
+      send(reply);
     }
 
     protected void refuseOrange(ACLMessage msg) {
@@ -209,7 +180,7 @@ public class Neighbour extends Agent {
       reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
       reply.setContent("orange");
       //send message
-      messagesToSend.add(reply);
+      send(reply);
     }
 
 
@@ -227,7 +198,7 @@ public class Neighbour extends Agent {
       reply.setContent("tomato");
       tomatoes += 1;
       //send message
-      messagesToSend.add(reply);
+      send(reply);
     }
 
     protected void refuseTomato(ACLMessage msg) {
@@ -235,7 +206,7 @@ public class Neighbour extends Agent {
       reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
       reply.setContent("tomato");
       //send message
-      messagesToSend.add(reply);
+      send(reply);
     }
 
 
@@ -272,9 +243,9 @@ public class Neighbour extends Agent {
     r = new Random();
     oranges_desired = r.nextInt(10);
     tomatoes_desired = r.nextInt(10);
-    oranges = 10;
-    tomatoes = 10;
-    System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
+    oranges = r.nextInt(10);
+    tomatoes = r.nextInt(10);
+    //System.out.println("Hello World! My name is "+getLocalName() + " " + oranges + "/" + oranges_desired + " " + tomatoes + "/" + tomatoes_desired);
 
     // Registration with the DF
     DFAgentDescription dfd = new DFAgentDescription();
